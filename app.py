@@ -13,7 +13,7 @@ app = dash.Dash(
     __name__, 
     plugins=[dl.plugins.pages],
     server=server,
-    external_stylesheets=[dbc.themes.DARKLY]
+    external_stylesheets=[dbc.themes.CERULEAN]
 )
 app.title="TimeSeries Analyzer"
 
@@ -22,6 +22,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Bar Chart", href="/bar")),
         dbc.NavItem(dbc.NavLink("Histogram", href="/hist")),
         dbc.NavItem(dbc.NavLink("Heatmap", href="/heat")),
+        dbc.NavItem(dbc.NavLink("Timeseries", href="/ts")),
         dbc.DropdownMenu(
             children=[
                 dbc.DropdownMenuItem("More pages", header=True),
