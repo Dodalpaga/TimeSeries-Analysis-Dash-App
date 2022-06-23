@@ -6,11 +6,11 @@ import dash_bootstrap_components as dbc
 register_page(__name__, path="/ts")
 
 colors = {
-    'background': '#dedede',
-    'text': '#292929'
+    'background': '#333333',
+    'text': '#ffffff'
 }
 
-defaults = ["Warping","Layer_Shifting","Blobs_Layer_Separation","Not_Sticking_To_Bed","Stringing","Gaps","Colapsing","Not_Extruding"]
+faults = ["Printing","Warping","Layer_Shifting","Blobs_Layer_Separation","Not_Sticking_To_Bed","Stringing","Gaps","Colapsing","Not_Extruding"]
 
 import pandas as pd
 
@@ -54,7 +54,7 @@ layout = html.Div(
         dcc.Graph(
             figure=fig,
             id="ts-chart",
-            style={'display':'flex','margin': '20px','height': '100%','width': '100%'},
+            style={'margin': '20px 20px 20px 0px','width': '100%', 'justify-content':'center', 'align-items':'center','display': 'inline-block', 'vertical-align': 'middle'},
         ),
         dcc.Interval(
             id='interval-component',
@@ -63,9 +63,17 @@ layout = html.Div(
         ),
         html.Div(
             [dbc.Button("Regenerate Labels", color="danger", id="generate-button", className="me-1", n_clicks=0),
-             html.Div("",style={'margin-left': '5%','margin-right': '5%'}),
-            dbc.Button("Warping", color="success", id="warping-button", className="me-1", n_clicks=0),
-            dbc.Button("Update", color="warning", id="update-button", className="me-1", n_clicks=0)],
+            html.Div("",style={'margin-left': '2.5%','margin-right': '2.5%'}),
+            dbc.Button("Warping", color="primary", id="warping-button", className="me-1", n_clicks=0),
+            dbc.Button("Layer-Shifting", color="primary", id="layer-shifting-button", className="me-1", n_clicks=0),
+            dbc.Button("Blobs / Layer-Separation", color="primary", id="blobs-button", className="me-1", n_clicks=0),
+            dbc.Button("Not Sticking To Bed", color="primary", id="nstb-button", className="me-1", n_clicks=0),
+            dbc.Button("Stringing", color="primary", id="stringing-button", className="me-1", n_clicks=0),
+            dbc.Button("Gaps", color="primary", id="gaps-button", className="me-1", n_clicks=0),
+            dbc.Button("Colapsing", color="primary", id="colapsing-button", className="me-1", n_clicks=0),
+            dbc.Button("Not Extruding", color="primary", id="not-extruding--button", className="me-1", n_clicks=0),
+            html.Div("",style={'margin-left': '2.5%','margin-right': '2.5%'}),
+            dbc.Button("Impression en cours", color="success", id="printing-button", className="me-1", n_clicks=0)],
             style={'display':'flex', 'margin-top': '20px', 'align-items':'center', 'justify-content':'center'}
         )
     ]
@@ -90,50 +98,126 @@ def update_sensor_dropdown(dataset):
         return [],[]
 
 from plotly.subplots import make_subplots
-@callback(Output("ts-chart", "figure"),[Input("date_feature", "value"), Input("sensor", "value") , Input("dataset", "value"), Input("ts-chart", "figure"), Input("generate-button", "n_clicks"), Input("warping-button", "n_clicks")])
-def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping):
+@callback(Output("ts-chart", "figure"),[Input("date_feature", "value"), Input("sensor", "value") , Input("dataset", "value"), Input("ts-chart", "figure"), Input("generate-button", "n_clicks"), Input("warping-button", "n_clicks"), Input("layer-shifting-button", "n_clicks"), Input("blobs-button", "n_clicks"), Input("nstb-button", "n_clicks"), Input("stringing-button", "n_clicks"), Input("gaps-button", "n_clicks"), Input("colapsing-button", "n_clicks"), Input("not-extruding--button", "n_clicks"), Input("printing-button", "n_clicks")])
+def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping,n_layer_shifting,n_blobs,n_nstb,n_stringing,n_gaps,n_colapsing,n_not_extruding,n_printing):
     # create an empty figure  with no data
     fig = go.Figure()
+    fig.update_layout(
+        plot_bgcolor=colors['background'],
+        paper_bgcolor=colors['background'],
+        font_color=colors['text'],
+        height=700,
+        xaxis=dict(
+            rangeslider=dict(
+                visible=True,
+                autorange=True,
+            )
+        )
+    )
+    fig.update_xaxes(showline=False, linewidth=2, linecolor='black')
+    fig.update_yaxes(showline=False, linewidth=2, linecolor='black')
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#ffffff')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#ffffff')
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-    print(changed_id)
     if dataset != None:
         df = pd.read_csv("./uploads/{}".format(dataset))
         if date_feature!=None :
             # Si jamais le fichier csv "label" n'existe pas on le crée (vide == tout à 0)
             if not os.path.exists("./results/{}_labels.csv".format(dataset[:-4])) :
                 df_labels = pd.DataFrame(df[date_feature])
-                df_labels[defaults] = 0
+                df_labels[faults] = 0
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
             df_labels = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
             if "generate-button" in changed_id:
-                df_labels[defaults] = 0
+                df_labels[faults] = 0
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
-            # Si on clique sur le bouton "Warping", on récupère les labels générés par le slider tout en bas de la page
             if "warping-button" in changed_id :
                 figure_data = figure["layout"]
-                range_of_slider = figure_data["xaxis2"]["range"]
+                range_of_slider = figure_data["xaxis"]["range"]
                 boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
                 boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
                 df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Warping"]=1
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "layer-shifting-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Layer_shifting"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "blobs-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Blobs_Layer_Separation"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "nstb-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Not_Sticking_To_Bed"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "stringing-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Stringing"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "gaps-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Gaps"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "colapsing-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Colapsing"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "not-extruding-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Not_Extruding"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "printing-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Printing"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+                
             if sensor!=None :
-                fig = make_subplots(2, 1, vertical_spacing=0.05, shared_xaxes=True)
+                fig = make_subplots(4, 1, 
+                                    vertical_spacing=0.2, 
+                                    shared_xaxes=True, 
+                                    specs=[[{'rowspan': 2, 'colspan': 1}],[None],[{'rowspan': 1, 'colspan': 1}],[{'rowspan': 1, 'colspan': 1}]])
                 fig.add_trace(go.Scatter(x=df[date_feature], y=df[sensor], name=sensor), row=1, col=1)
-                fig.add_trace(go.Scatter(x=df_labels[date_feature], y=df_labels["Warping"], name="Warping"), row=2, col=1)
-                fig.add_trace(go.Scatter(x=df_labels[date_feature], y=df_labels["Layer_Shifting"], name="Layer_Shifting"), row=2, col=1)
-                    
+                fig.add_trace(go.Scatter(x=df_labels[date_feature], y=df_labels["Printing"], name="Printing"), row=4, col=1)
+                for fault in faults[1:]:
+                    fig.add_trace(go.Scatter(x=df_labels[date_feature], y=df_labels[fault], name=fault), row=3, col=1)
                 fig.update_layout(
                     plot_bgcolor=colors['background'],
                     paper_bgcolor=colors['background'],
                     font_color=colors['text'],
-                    width=1680,
-                    height=600,
-                    xaxis2=dict(
-                        scaleanchor="x2",
+                    height=700,
+                    xaxis=dict(
                         rangeslider=dict(
                             visible=True,
                             autorange=True,
                         )
                     )
                 )
+                fig.update_xaxes(showline=False, linewidth=2, linecolor='black')
+                fig.update_yaxes(showline=False, linewidth=2, linecolor='black')
+                fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#ffffff')
+                fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#ffffff')
     return fig

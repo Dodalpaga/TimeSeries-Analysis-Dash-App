@@ -12,7 +12,7 @@ app = dash.Dash(
     __name__, 
     plugins=[dl.plugins.pages],
     server=server,
-    external_stylesheets=[dbc.themes.CERULEAN],
+    external_stylesheets=[dbc.themes.DARKLY],
 )
 app.title="TimeSeries Analyzer"
 
