@@ -98,11 +98,17 @@ def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping):
     print(changed_id)
     if dataset != None:
         df = pd.read_csv("./uploads/{}".format(dataset))
-        df_labels = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
         if date_feature!=None :
+            # Si jamais le fichier csv "label" n'existe pas on le crée (vide == tout à 0)
+            if not os.path.exists("./results/{}_labels.csv".format(dataset[:-4])) :
+                df_labels = pd.DataFrame(df[date_feature])
+                df_labels[defaults] = 0
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            df_labels = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
             if "generate-button" in changed_id:
                 df_labels[defaults] = 0
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            # Si on clique sur le bouton "Warping", on récupère les labels générés par le slider tout en bas de la page
             if "warping-button" in changed_id :
                 figure_data = figure["layout"]
                 range_of_slider = figure_data["xaxis2"]["range"]
@@ -111,11 +117,6 @@ def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping):
                 df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Warping"]=1
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
             if sensor!=None :
-                # Si jamais le fichier csv "label" n'existe pas on le crée (vide == tout à 0)
-                if not os.path.exists("./results/{}_labels.csv".format(dataset[:-4])) :
-                    df_labels = pd.DataFrame(df[date_feature])
-                    df_labels[defaults] = 0
-                    df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
                 fig = make_subplots(2, 1, vertical_spacing=0.05, shared_xaxes=True)
                 fig.add_trace(go.Scatter(x=df[date_feature], y=df[sensor], name=sensor), row=1, col=1)
                 fig.add_trace(go.Scatter(x=df_labels[date_feature], y=df_labels["Warping"], name="Warping"), row=2, col=1)
