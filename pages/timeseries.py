@@ -31,7 +31,7 @@ layout = html.Div(
                 clearable=False,
                 style={'width': '30%', 'color':'#111111'},
             )],
-            style={'display':'flex', 'margin-top': '20px', 'align-items':'center'}
+            style={'display':'flex', 'margin-top': '10px', 'align-items':'center'}
         ),
         html.Div(
             [html.Div("Choose the time feature", style={'margin-right': '10px'}),
@@ -40,7 +40,7 @@ layout = html.Div(
                 clearable=False,
                 style={'width': '30%', 'color':'#111111'},
             )],
-            style={'display':'flex', 'margin-top': '20px', 'align-items':'center'}
+            style={'display':'flex', 'margin-top': '10px', 'align-items':'center'}
         ),
         html.Div(
             [html.Div("Choose an other feature", style={'margin-right': '10px'}),
@@ -49,12 +49,14 @@ layout = html.Div(
                 clearable=False,
                 style={'width': '30%', 'color':'#111111'},
             )],
-            style={'display':'flex', 'margin-top': '20px', 'align-items':'center'}
+            style={'display':'flex', 'margin-top': '10px', 'align-items':'center'}
         ),
-        dcc.Graph(
-            figure=fig,
-            id="ts-chart",
-            style={'margin': '20px 20px 20px 0px','width': '100%', 'justify-content':'center', 'align-items':'center','display': 'inline-block', 'vertical-align': 'middle'},
+        html.Div(
+            dcc.Graph(
+                figure=fig,
+                id="ts-chart",
+            ),
+            style={'margin': '10px', 'justify-content':'center', 'align-items':'center'},
         ),
         dcc.Interval(
             id='interval-component',
@@ -106,7 +108,6 @@ def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping,n_layer
         plot_bgcolor=colors['background'],
         paper_bgcolor=colors['background'],
         font_color=colors['text'],
-        height=700,
         xaxis=dict(
             rangeslider=dict(
                 visible=True,
@@ -208,7 +209,7 @@ def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping,n_layer
                     plot_bgcolor=colors['background'],
                     paper_bgcolor=colors['background'],
                     font_color=colors['text'],
-                    height=700,
+                    height=650,
                     xaxis=dict(
                         rangeslider=dict(
                             visible=True,
