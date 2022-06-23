@@ -1,4 +1,3 @@
-from unicodedata import name
 import dash
 import glob,os
 from dash_labs.plugins.pages import register_page
@@ -15,7 +14,7 @@ defaults = ["Warping","Layer_Shifting","Blobs_Layer_Separation","Not_Sticking_To
 
 import pandas as pd
 
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import Dash, dcc, html, Input, Output, callback_context, callback
 import plotly.express as px
 import plotly.graph_objects as go # or plotly.express as px
 
@@ -57,18 +56,16 @@ layout = html.Div(
             id="ts-chart",
             style={'display':'flex','margin': '20px','height': '100%','width': '100%'},
         ),
+        dcc.Interval(
+            id='interval-component',
+            interval=1*1000, # in milliseconds
+            n_intervals=0
+        ),
         html.Div(
             [dbc.Button("Regenerate Labels", color="danger", id="generate-button", className="me-1", n_clicks=0),
              html.Div("",style={'margin-left': '5%','margin-right': '5%'}),
             dbc.Button("Warping", color="success", id="warping-button", className="me-1", n_clicks=0),
-            dbc.Button("Layer_Shifting", color="warning", id="ls-button", className="me-1", n_clicks=0),
-            dbc.Button("Blobs_Layer_Separation", color="primary", id="blobs-ls-button", className="me-1", n_clicks=0),
-            dbc.Button("Not_Sticking_To_Bed", color="info", id="nstb-button", className="me-1", n_clicks=0),
-            dbc.Button("Gaps", color="light", id="gaps-button", className="me-1", n_clicks=0),
-            dbc.Button("Colapsing", color="dark", id="colapse-button", className="me-1", n_clicks=0),
-            dbc.Button("Not_Extruding", color="secondary", id="NotExtr-button", className="me-1", n_clicks=0),
-            html.Span(id="generate-output", style={"verticalAlign": "middle","display":"flex"}),
-            html.Span(id="warping-output", style={"verticalAlign": "middle","display":"flex"})],
+            dbc.Button("Update", color="warning", id="update-button", className="me-1", n_clicks=0)],
             style={'display':'flex', 'margin-top': '20px', 'align-items':'center', 'justify-content':'center'}
         )
     ]
@@ -93,18 +90,32 @@ def update_sensor_dropdown(dataset):
         return [],[]
 
 from plotly.subplots import make_subplots
-@callback(Output("ts-chart", "figure"),[Input("date_feature", "value"), Input("sensor", "value") , Input("dataset", "value")])
-def update_chart(date_feature,sensor,dataset):
+@callback(Output("ts-chart", "figure"),[Input("date_feature", "value"), Input("sensor", "value") , Input("dataset", "value"), Input("ts-chart", "figure"), Input("generate-button", "n_clicks"), Input("warping-button", "n_clicks")])
+def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping):
+    # create an empty figure  with no data
+    fig = go.Figure()
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    print(changed_id)
     if dataset != None:
         df = pd.read_csv("./uploads/{}".format(dataset))
+        df_labels = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
         if date_feature!=None :
+            if "generate-button" in changed_id:
+                df_labels[defaults] = 0
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
+            if "warping-button" in changed_id :
+                figure_data = figure["layout"]
+                range_of_slider = figure_data["xaxis2"]["range"]
+                boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
+                boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Warping"]=1
+                df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
             if sensor!=None :
                 # Si jamais le fichier csv "label" n'existe pas on le crée (vide == tout à 0)
                 if not os.path.exists("./results/{}_labels.csv".format(dataset[:-4])) :
-                    labels_df = pd.DataFrame(df[date_feature])
-                    labels_df[defaults] = 0
-                    labels_df.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
-                df_labels = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
+                    df_labels = pd.DataFrame(df[date_feature])
+                    df_labels[defaults] = 0
+                    df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
                 fig = make_subplots(2, 1, vertical_spacing=0.05, shared_xaxes=True)
                 fig.add_trace(go.Scatter(x=df[date_feature], y=df[sensor], name=sensor), row=1, col=1)
                 fig.add_trace(go.Scatter(x=df_labels[date_feature], y=df_labels["Warping"], name="Warping"), row=2, col=1)
@@ -124,43 +135,4 @@ def update_chart(date_feature,sensor,dataset):
                         )
                     )
                 )
-            else:
-                # create an empty figure  with no data
-                fig = go.Figure()
-        else:
-            # create an empty figure  with no data
-            fig = go.Figure()
-    else:
-        # create an empty figure  with no data
-        fig = go.Figure()
-            # if date_feature!=None and dataset!=None and sensor!=None and (n_generate>0 or n_warping>0):
-            #     fig.update_layout()
     return fig
-
-@callback(
-    Output("generate-output", "children"), [Input("generate-button", "n_clicks"),Input("date_feature", "value") , Input("dataset", "value")]
-)
-def regenerate_labels(n_generate,date_feature,dataset):
-    if n_generate > 0 and date_feature!=None and dataset!=None:
-        labels_df = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
-        labels_df[defaults] = 0
-        labels_df.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
-        return f"Clicked {n_generate} times."
-    else:
-        return "Not clicked."
-    
-@callback(
-    Output("warping-output", "children"), [Input("warping-button", "n_clicks"),Input("date_feature", "value") , Input("dataset", "value"), Input("ts-chart", "figure")]
-)
-def testing_boundaries(n_warping,date_feature,dataset,fig):
-    if n_warping > 0 and date_feature!=None and dataset!=None:
-        figure_data = fig["layout"]
-        range_of_slider = figure_data["xaxis2"]["range"]
-        df = pd.read_csv("./results/{}_labels.csv".format(dataset[:-4]))
-        boundary_low =  df.iloc[(df['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
-        boundary_high = df.iloc[(df['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
-        df.loc[df["ts"].between(boundary_low,boundary_high),"Warping"]=1
-        df.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
-        return f"Slider range {range_of_slider}."
-    else:
-        return "Not clicked."
