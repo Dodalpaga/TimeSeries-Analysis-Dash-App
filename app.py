@@ -6,6 +6,9 @@ from dash import Dash, dcc, html, Input, Output
 import dash_labs as dl
 import dash_bootstrap_components as dbc
 
+from dash_bootstrap_templates import ThemeSwitchAIO
+url_theme1 = dbc.themes.BOOTSTRAP
+url_theme2 = dbc.themes.DARKLY
 
 server = Flask(__name__)
 app = dash.Dash(
@@ -38,7 +41,14 @@ navbar = dbc.NavbarSimple(
 )
 
 app.layout = dbc.Container(
-    [navbar,dl.plugins.page_container],
+    [
+        navbar,
+        dl.plugins.page_container,
+        html.Div(
+            ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
+            style={'position': 'fixed', 'bottom': '1%', 'left': '1%'},
+        )
+    ],
     fluid=True,
 )
 
