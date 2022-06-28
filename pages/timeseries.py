@@ -144,7 +144,7 @@ def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping,n_layer
                 range_of_slider = figure_data["xaxis"]["range"]
                 boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
                 boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
-                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Layer_shifting"]=1
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Layer_Shifting"]=1
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
             if "blobs-button" in changed_id :
                 figure_data = figure["layout"]
