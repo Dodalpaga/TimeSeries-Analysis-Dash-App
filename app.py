@@ -26,8 +26,8 @@ navbar = dbc.NavbarSimple(
         dbc.DropdownMenu(
             children=[
                 dbc.DropdownMenuItem("More pages", header=True),
-                dbc.DropdownMenuItem("GitHub", href="/github"),
-                dbc.DropdownMenuItem("Contact", href="/contact"),
+                dbc.DropdownMenuItem("GitHub", href="https://github.com/Dodalpaga/TimeSeries-Analysis-Dash-App", target="_blank"),
+                dbc.DropdownMenuItem("Contact", href="https://dodalpaga.github.io/Porfolio/", target="_blank"),
             ],
             nav=True,
             in_navbar=True,
@@ -40,7 +40,19 @@ navbar = dbc.NavbarSimple(
     dark=True,
 )
 
-app.layout = dbc.Container(
+# app.layout = dbc.Container(
+#     [
+#         navbar,
+#         dl.plugins.page_container,
+#         html.Div(
+#             ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
+#             style={'position': 'fixed', 'bottom': '1%', 'left': '1%'},
+#         )
+#     ],
+#     fluid=True,
+# )
+
+app.layout = html.Div(
     [
         navbar,
         dl.plugins.page_container,
@@ -48,8 +60,7 @@ app.layout = dbc.Container(
             ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
             style={'position': 'fixed', 'bottom': '1%', 'left': '1%'},
         )
-    ],
-    fluid=True,
+    ]
 )
 
 UPLOAD_DIRECTORY = "uploads/"
@@ -111,6 +122,9 @@ def update_output(uploaded_filenames, uploaded_file_contents):
 def index():
     return 'Hello Flask app'
 
+@server.route("/github")
+def github():
+    return 'Hello Flask app'
 
 # Run the server
 if __name__ == '__main__':

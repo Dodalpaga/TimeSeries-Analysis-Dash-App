@@ -31,7 +31,7 @@ layout = html.Div(
                 clearable=False,
                 style={'width': '30%', 'color':'#111111'},
             )],
-            style={'display':'flex', 'margin-top': '10px', 'align-items':'center'}
+            style={'display':'flex', 'margin': '10px', 'align-items':'center'}
         ),
         html.Div(
             [html.Div("Choose the time feature", style={'margin-right': '10px'}),
@@ -40,7 +40,7 @@ layout = html.Div(
                 clearable=False,
                 style={'width': '30%', 'color':'#111111'},
             )],
-            style={'display':'flex', 'margin-top': '10px', 'align-items':'center'}
+            style={'display':'flex', 'margin': '10px', 'align-items':'center'}
         ),
         html.Div(
             [html.Div("Choose an other feature", style={'margin-right': '10px'}),
@@ -49,7 +49,7 @@ layout = html.Div(
                 clearable=False,
                 style={'width': '30%', 'color':'#111111'},
             )],
-            style={'display':'flex', 'margin-top': '10px', 'align-items':'center'}
+            style={'display':'flex', 'margin': '10px', 'align-items':'center'}
         ),
         html.Div(
             dcc.Graph(
@@ -73,10 +73,10 @@ layout = html.Div(
             dbc.Button("Stringing", color="primary", id="stringing-button", className="me-1", n_clicks=0),
             dbc.Button("Gaps", color="primary", id="gaps-button", className="me-1", n_clicks=0),
             dbc.Button("Colapsing", color="primary", id="colapsing-button", className="me-1", n_clicks=0),
-            dbc.Button("Not Extruding", color="primary", id="not-extruding--button", className="me-1", n_clicks=0),
+            dbc.Button("Not Extruding", color="primary", id="not-extruding-button", className="me-1", n_clicks=0),
             html.Div("",style={'margin-left': '2.5%','margin-right': '2.5%'}),
             dbc.Button("Impression en cours", color="success", id="printing-button", className="me-1", n_clicks=0)],
-            style={'display':'flex', 'margin-top': '20px', 'align-items':'center', 'justify-content':'center'}
+            style={'display':'flex', 'margin': '20px', 'align-items':'center', 'justify-content':'center'}
         )
     ]
 )
@@ -100,7 +100,7 @@ def update_sensor_dropdown(dataset):
         return [],[]
 
 from plotly.subplots import make_subplots
-@callback(Output("ts-chart", "figure"),[Input("date_feature", "value"), Input("sensor", "value") , Input("dataset", "value"), Input("ts-chart", "figure"), Input("generate-button", "n_clicks"), Input("warping-button", "n_clicks"), Input("layer-shifting-button", "n_clicks"), Input("blobs-button", "n_clicks"), Input("nstb-button", "n_clicks"), Input("stringing-button", "n_clicks"), Input("gaps-button", "n_clicks"), Input("colapsing-button", "n_clicks"), Input("not-extruding--button", "n_clicks"), Input("printing-button", "n_clicks")])
+@callback(Output("ts-chart", "figure"),[Input("date_feature", "value"), Input("sensor", "value") , Input("dataset", "value"), Input("ts-chart", "figure"), Input("generate-button", "n_clicks"), Input("warping-button", "n_clicks"), Input("layer-shifting-button", "n_clicks"), Input("blobs-button", "n_clicks"), Input("nstb-button", "n_clicks"), Input("stringing-button", "n_clicks"), Input("gaps-button", "n_clicks"), Input("colapsing-button", "n_clicks"), Input("not-extruding-button", "n_clicks"), Input("printing-button", "n_clicks")])
 def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping,n_layer_shifting,n_blobs,n_nstb,n_stringing,n_gaps,n_colapsing,n_not_extruding,n_printing):
     # create an empty figure  with no data
     fig = go.Figure()
