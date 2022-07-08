@@ -40,18 +40,6 @@ navbar = dbc.NavbarSimple(
     dark=True,
 )
 
-# app.layout = dbc.Container(
-#     [
-#         navbar,
-#         dl.plugins.page_container,
-#         html.Div(
-#             ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
-#             style={'position': 'fixed', 'bottom': '1%', 'left': '1%'},
-#         )
-#     ],
-#     fluid=True,
-# )
-
 app.layout = html.Div(
     [
         navbar,
