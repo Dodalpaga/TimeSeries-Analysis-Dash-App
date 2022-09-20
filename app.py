@@ -52,10 +52,15 @@ app.layout = html.Div(
 )
 
 UPLOAD_DIRECTORY = "uploads/"
+RESULT_DIRECTORY = "results/"
 import os
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.system("pwd")
     os.system("mkdir {}".format(UPLOAD_DIRECTORY))
+    
+if not os.path.exists(RESULT_DIRECTORY):
+    os.system("pwd")
+    os.system("mkdir {}".format(RESULT_DIRECTORY))
 
 @server.route("/download/<path:path>")
 def download(path):
@@ -79,6 +84,15 @@ def uploaded_files():
             files.append(filename)
     return files
 
+def result_files():
+    """List the files in the upload directory."""
+    files = []
+    for filename in os.listdir(RESULT_DIRECTORY):
+        path = os.path.join(RESULT_DIRECTORY, filename)
+        if os.path.isfile(path):
+            files.append(filename)
+    return files
+
 
 def file_download_link(filename):
     """Create a Plotly Dash 'A' element that downloads a file from the app."""
@@ -87,7 +101,7 @@ def file_download_link(filename):
 
 
 @app.callback(
-    Output("file-list", "children"),
+    [Output("file-list", "children"),Output("results-list", "children")],
     [Input("upload-data", "filename"), Input("upload-data", "contents")],
 )
 
@@ -99,10 +113,13 @@ def update_output(uploaded_filenames, uploaded_file_contents):
             save_file(name, data)
 
     files = uploaded_files()
+    files.sort()
+    results = result_files()
+    results.sort()
     if len(files) == 0:
-        return [html.Li("No files yet!")]
+        return [html.Li("No uploads yet!")],[html.Li("No results yet!")]
     else:
-        return [html.Li(file_download_link(filename)) for filename in files]
+        return [html.Li(file_download_link(filename)) for filename in files],[html.Li(file_download_link(filename)) for filename in results]
     
 
 

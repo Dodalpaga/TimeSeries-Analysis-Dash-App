@@ -24,8 +24,12 @@ layout = html.Div(
             },
             multiple=True,
         ),
-        html.H2("File List"),
-        html.Ul(id="file-list"),
+        html.Div([
+            html.H2("File List"),
+            html.Ul(id="file-list"),
+            html.H2("Results List"),
+            html.Ul(id="results-list")],
+                 style={"columns":2}),
     ],
-    style={"max-width": "500px"},
+    style={"max-width": "500px","padding":"10px"},
 )
