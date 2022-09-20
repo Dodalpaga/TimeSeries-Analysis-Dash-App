@@ -2,7 +2,7 @@ import dash
 import base64
 from flask import Flask, send_from_directory
 from urllib.parse import quote as urlquote
-from dash import Dash, dcc, html, Input, Output
+from dash import html, Input, Output
 import dash_labs as dl
 import dash_bootstrap_components as dbc
 
