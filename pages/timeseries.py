@@ -10,7 +10,7 @@ colors = {
     'text': '#ffffff'
 }
 
-faults = ["Printing","Warping","Layer_Shifting","Blobs_Layer_Separation","Not_Sticking_To_Bed","Stringing","Gaps","Colapsing","Not_Extruding"]
+faults = ["Printing","Warping","Layer_Shifting","Blobs","Not_Sticking_To_Bed","Stringing","Gaps","Colapsing","Not_Extruding"]
 
 import pandas as pd
 
@@ -68,7 +68,7 @@ layout = html.Div(
             html.Div("",style={'margin-left': '2.5%','margin-right': '2.5%'}),
             dbc.Button("Warping", color="primary", id="warping-button", className="me-1", n_clicks=0),
             dbc.Button("Layer-Shifting", color="primary", id="layer-shifting-button", className="me-1", n_clicks=0),
-            dbc.Button("Blobs / Layer-Separation", color="primary", id="blobs-button", className="me-1", n_clicks=0),
+            dbc.Button("Blobs", color="primary", id="blobs-button", className="me-1", n_clicks=0),
             dbc.Button("Not Sticking To Bed", color="primary", id="nstb-button", className="me-1", n_clicks=0),
             dbc.Button("Stringing", color="primary", id="stringing-button", className="me-1", n_clicks=0),
             dbc.Button("Gaps", color="primary", id="gaps-button", className="me-1", n_clicks=0),
@@ -151,7 +151,7 @@ def update_chart(date_feature,sensor,dataset,figure,n_generate,n_warping,n_layer
                 range_of_slider = figure_data["xaxis"]["range"]
                 boundary_low =  df_labels.iloc[(df_labels['ts']-range_of_slider[0]).abs().argsort()[0]]["ts"]
                 boundary_high = df_labels.iloc[(df_labels['ts']-range_of_slider[1]).abs().argsort()[0]]["ts"]
-                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Blobs_Layer_Separation"]=1
+                df_labels.loc[df_labels["ts"].between(boundary_low,boundary_high),"Blobs"]=1
                 df_labels.to_csv("./results/{}_labels.csv".format(dataset[:-4]),index=False)
             if "nstb-button" in changed_id :
                 figure_data = figure["layout"]
