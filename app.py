@@ -6,16 +6,14 @@ from dash import html, Input, Output
 import dash_labs as dl
 import dash_bootstrap_components as dbc
 
-from dash_bootstrap_templates import ThemeSwitchAIO
-url_theme1 = dbc.themes.BOOTSTRAP
-url_theme2 = dbc.themes.DARKLY
+url_theme1 = dbc.themes.LUX
 
 server = Flask(__name__)
 app = dash.Dash(
     __name__, 
     plugins=[dl.plugins.pages],
     server=server,
-    external_stylesheets=[dbc.themes.DARKLY],
+    external_stylesheets=[url_theme1],
 )
 app.title="TimeSeries Analyzer"
 app._favicon = ("./assets/favicon.ico")
@@ -43,11 +41,7 @@ navbar = dbc.NavbarSimple(
 app.layout = html.Div(
     [
         navbar,
-        dl.plugins.page_container,
-        html.Div(
-            ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
-            style={'position': 'fixed', 'bottom': '1%', 'left': '1%'},
-        )
+        dl.plugins.page_container
     ]
 )
 
@@ -125,11 +119,11 @@ def update_output(uploaded_filenames, uploaded_file_contents):
 
 @server.route("/")
 def index():
-    return 'Hello Flask app'
+    return 'TimeSeries labelling app'
 
 @server.route("/github")
 def github():
-    return 'Hello Flask app'
+    return 'TimeSeries labelling app'
 
 # Run the server
 if __name__ == '__main__':
