@@ -2,7 +2,7 @@
 
 ## Live Example
 
-https://www.pythonanywhere.com/user/Dodalpaga/
+https://dodalpaga.pythonanywhere.com/
 
 ## Launch app
 
