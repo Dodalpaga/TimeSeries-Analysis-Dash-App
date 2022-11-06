@@ -2,7 +2,7 @@ import dash
 import base64
 from flask import Flask, send_from_directory
 from urllib.parse import quote as urlquote
-from dash import html, Input, Output
+from dash import html, Input, Output, ctx
 import dash_labs as dl
 import dash_bootstrap_components as dbc
 
@@ -13,7 +13,7 @@ app = dash.Dash(
     __name__, 
     plugins=[dl.plugins.pages],
     server=server,
-    external_stylesheets=[url_theme1],
+    external_stylesheets=[url_theme1]
 )
 app.title="TimeSeries Analyzer"
 app._favicon = ("./assets/favicon.ico")
@@ -59,7 +59,7 @@ if not os.path.exists(RESULT_DIRECTORY):
 @server.route("/download/<path:path>")
 def download(path):
     """Serve a file from the upload directory."""
-    return send_from_directory(UPLOAD_DIRECTORY, path, as_attachment=True)
+    return send_from_directory(RESULT_DIRECTORY, path, as_attachment=True)
 
 
 def save_file(name, content):
